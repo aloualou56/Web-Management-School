@@ -1,0 +1,86 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa;
+    color: #333;
+    margin: 0;
+    padding: 0; 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+}
+
+::-webkit-scrollbar {
+    display: none; 
+}
+
+h1 {
+    text-align: center;
+    color: #007bff;
+    margin: 30px 0; 
+}
+
+.nav-link, .dropdown-toggle {
+    color: white !important;
+    font-size: 18px;
+    font-family: 'Arial', sans-serif;
+}
+
+.nav-link:hover, .dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; 
+}
+
+.dropdown-center .dropdown-menu {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dropdown-menu {
+    background-color: #343a40; 
+}
+
+.dropdown-item {
+    color: white !important;
+    font-size: 18px;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.my-dropdown-toggle::after {
+    content: none;
+}
+
+.navbar {
+    background: linear-gradient(90deg, #007BFF, #6610f2);
+    padding: 10px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+
+
+@media (max-width: 1200px) {
+    
+    .offcanvas {
+        background: linear-gradient(90deg, #007BFF, #6610f2);
+        color: white;
+    }
+}
+
+@media (max-width: 600px) {
+    .student-container {
+        flex: 0 0 calc(100% - 20px);
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}

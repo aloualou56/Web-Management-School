@@ -1,0 +1,41 @@
+services:
+  # Web service (your Django app)
+  - type: web
+    name: django-management
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py setup_attendance_tasks"
+    startCommand: "gunicorn robotiki.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DATABASE_URL
+        fromDatabase:
+          name: django-management-db
+          property: connectionString
+
+  # Background worker (runs the scheduled tasks)
+  - type: worker
+    name: django-management-worker
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate"
+    startCommand: "python manage.py process_tasks"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DATABASE_URL
+        fromDatabase:
+          name: django-management-db
+          property: connectionString
+
+databases:
+  - name: django-management-db
+    databaseName: django_management
+    user: django_management_user

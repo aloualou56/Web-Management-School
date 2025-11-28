@@ -1,0 +1,38 @@
+name: Attendance Automation
+
+on:
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  trigger-attendance-tasks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: none
+    
+    steps:
+      - name: Trigger Attendance Generation
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            ${{ secrets.RENDER_APP_URL }}/api/trigger-attendance-generation/ \
+            -H "Authorization: Bearer ${{ secrets.ATTENDANCE_API_TOKEN }}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          echo "Response: $body"
+          echo "HTTP Code: $http_code"
+          if [ "$http_code" != "200" ]; then
+            echo "Failed to trigger attendance generation"
+            exit 1
+          fi
+      
+      - name: Trigger Attendance Autosave
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            ${{ secrets.RENDER_APP_URL }}/api/trigger-attendance-autosave/ \
+            -H "Authorization: Bearer ${{ secrets.ATTENDANCE_API_TOKEN }}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          echo "Response: $body"
+          echo "HTTP Code: $http_code"
+          if [ "$http_code" != "200" ]; then
+            echo "Failed to trigger attendance autosave"
+          fi

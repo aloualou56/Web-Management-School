@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School Management{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+            --sidebar-bg: #2c3e50;
+            --sidebar-hover: #34495e;
+            --sidebar-active: #3498db;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+            color: #333;
+        }
+
+        .sidebar {
+            height: 100vh;
+            width: 260px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, #1a252f 100%);
+            padding-top: 20px;
+            color: white;
+            transition: all 0.3s ease-in-out;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a i {
+            width: 25px;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar a:hover {
+            color: #fff;
+            background-color: var(--sidebar-hover);
+            border-left-color: var(--sidebar-active);
+            padding-left: 28px;
+        }
+
+        .sidebar .active {
+            background-color: var(--sidebar-hover);
+            color: white;
+            border-left-color: var(--sidebar-active);
+            font-weight: 500;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 25px;
+            transition: all 0.3s ease-in-out;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58,59,69,0.15);
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 0.5rem;
+        }
+
+        .navbar h4 {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -260px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58,59,69,0.15);
+            margin-bottom: 25px;
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58,59,69,0.2);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Button improvements */
+        .btn {
+            border-radius: 0.35rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+        }
+
+        /* Table improvements */
+        .table {
+            color: #333;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid #e3e6f0;
+            color: var(--dark-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(78, 115, 223, 0.05);
+            cursor: pointer;
+        }
+
+        /* Badge improvements */
+        .badge {
+            padding: 0.4em 0.8em;
+            font-weight: 500;
+            border-radius: 0.35rem;
+        }
+
+        /* Modal improvements */
+        .modal-content {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid #e3e6f0;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Form improvements */
+        .form-control, .form-select {
+            border: 1px solid #d1d3e2;
+            border-radius: 0.35rem;
+            padding: 0.625rem 0.75rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Alert improvements */
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+        }
+
+        /* Progress bar improvements */
+        .progress {
+            border-radius: 0.5rem;
+            background-color: #e3e6f0;
+        }
+
+        .progress-bar {
+            border-radius: 0.5rem;
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card, .table, .alert {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Dropdown menu improvements */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            border-radius: 0.35rem;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.25rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-color);
+        }
+
+        /* Modern table styling */
+        .modern-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+        }
+
+        .modern-table thead th {
+            background: linear-gradient(180deg, #f8f9fc 0%, #f1f3f5 100%);
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 1.25rem 1rem;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .modern-table tbody tr:hover {
+            background: linear-gradient(90deg, #f8f9fc 0%, #ffffff 100%);
+            transform: translateX(4px);
+            box-shadow: -4px 0 0 0 var(--primary-color), 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .modern-table tbody td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+        }
+
+        /* Action buttons */
+        .action-cell {
+            min-width: 200px;
+        }
+
+        .action-btn {
+            font-size: 0.8125rem;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            border-width: 1.5px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-btn i {
+            font-size: 0.875rem;
+        }
+
+        /* Colored pill badges */
+        .badge.rounded-pill {
+            padding: 0.5em 1.2em;
+            font-weight: 500;
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+        }
+
+        .bg-success-subtle {
+            background-color: #d1f2eb !important;
+        }
+
+        .bg-info-subtle {
+            background-color: #d1ecf1 !important;
+        }
+
+        .bg-secondary-subtle {
+            background-color: #e2e3e5 !important;
+        }
+
+        /* Contact info styling */
+        .contact-info div {
+            line-height: 1.8;
+            padding: 0.125rem 0;
+        }
+
+        .contact-info i {
+            width: 18px;
+            text-align: center;
+        }
+
+        /* Student detail page improvements */
+        .info-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item .fw-medium {
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+
+        /* Gradient for avatars */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+        }
+
+        /* Button hover effects for action buttons */
+        .btn-outline-primary:hover, .btn-outline-info:hover, .btn-outline-danger:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Image thumbnail in detail view */
+        .img-thumbnail {
+            padding: 0.5rem;
+            background-color: #fff;
+            border: 3px solid #dee2e6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Enhanced card styling */
+        .card {
+            border: 1px solid #e3e6f0;
+        }
+
+        .card-header {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%);
+            border-bottom: 2px solid #e3e6f0;
+        }
+
+        /* Search input enhancement */
+        .input-group .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        /* Student ID badge */
+        .badge.bg-light {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        /* Server clock styling */
+        #server-clock:hover {
+            box-shadow: 0 0.25rem 0.75rem rgba(78, 115, 223, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-graduation-cap"></i> Robotiki</h3>
+        </div>
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+        <a href="{% url 'people:student_list' %}" class="{% if 'people/students' in request.path %}active{% endif %}">
+            <i class="fas fa-user-graduate me-2"></i> Students
+        </a>
+        <a href="{% url 'people:guardian_list' %}" class="{% if 'people/guardians' in request.path %}active{% endif %}">
+            <i class="fas fa-user-friends me-2"></i> Guardians
+        </a>
+        <a href="{% url 'class_related:grade_list' %}" class="{% if 'class/grades' in request.path %}active{% endif %}">
+            <i class="fas fa-chalkboard me-2"></i> Classes
+        </a>
+        <a href="{% url 'class_related:attendance_list' %}" class="{% if 'class/attendance' in request.path and 'history' not in request.path %}active{% endif %}">
+            <i class="fas fa-calendar-check me-2"></i> Attendance
+        </a>
+        <a href="{% url 'people:barcode_scanner' %}" class="{% if 'scanner' in request.path %}active{% endif %}">
+            <i class="fas fa-qrcode me-2"></i> QR Scanner
+        </a>
+        <a href="{% url 'people:generate_all_qr_codes' %}" class="{% if 'qr-codes' in request.path %}active{% endif %}">
+            <i class="fas fa-print me-2"></i> Student QR Codes
+        </a>
+        <a href="{% url 'class_related:attendance_history' %}" class="{% if 'class/attendance_history' in request.path %}active{% endif %}">
+            <i class="fas fa-history me-2"></i> History
+        </a>
+        <a href="{% url 'payments:payment_list' %}" class="{% if 'payments/payments' in request.path %}active{% endif %}">
+            <i class="fas fa-money-bill-wave me-2"></i> Payments
+        </a>
+        <a href="{% url 'payments:payment_plan_list' %}" class="{% if 'payments/plans' in request.path %}active{% endif %}">
+            <i class="fas fa-file-invoice-dollar me-2"></i> Payment Plans
+        </a>
+        <a href="{% url 'payments:receipt_list' %}" class="{% if 'payments/receipts' in request.path %}active{% endif %}">
+            <i class="fas fa-receipt me-2"></i> Receipts
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-outline-primary d-md-none" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <h4 class="mb-0 ms-3">{% block header %}Dashboard{% endblock %}</h4>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <!-- Server Time Clock -->
+                        <li class="nav-item me-3 d-flex align-items-center">
+                            <div id="server-clock" class="d-flex align-items-center" style="padding: 8px 16px; background-color: white; border-radius: 0.35rem; box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                                <i class="fas fa-clock" style="color: #4e73df; font-size: 1.1rem; margin-right: 10px;"></i>
+                                <span id="server-time-display" class="d-none d-lg-inline" style="color: #5a5c69; font-weight: 500; font-size: 0.875rem;">Loading...</span>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle fa-lg me-2"></i>
+                                <span class="d-none d-md-inline">{{ request.user.username|default:"User" }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'people:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal fade" id="customConfirmModal" tabindex="-1" aria-labelledby="customConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-danger" id="customConfirmModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Action
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p id="customConfirmMessage" class="mb-0"></p>
+                </div>
+                <div class="modal-footer border-0 pt-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="customConfirmBtn">
+                        <i class="fas fa-check me-1"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (Optional but helpful for simple AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebarCollapse = document.getElementById('sidebarCollapse');
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', function () {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+        });
+
+        // Custom confirmation dialog function
+        function showCustomConfirm(message, onConfirm) {
+            document.getElementById('customConfirmMessage').textContent = message;
+            const modal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
+            
+            const confirmBtn = document.getElementById('customConfirmBtn');
+            
+            // Remove any existing click handlers by cloning the button
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            // Add new click handler for confirmation
+            newConfirmBtn.addEventListener('click', function() {
+                modal.hide();
+                if (typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            });
+            
+            modal.show();
+        }
+
+        // Server time clock functionality
+        function updateServerTime() {
+            fetch('{% url "class_related:server_time" %}')
+                .then(response => response.json())
+                .then(data => {
+                    const displayElement = document.getElementById('server-time-display');
+                    if (displayElement) {
+                        displayElement.textContent = data.full_display;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching server time:', error);
+                    const displayElement = document.getElementById('server-time-display');
+                    if (displayElement) {
+                        displayElement.textContent = 'Loading...';
+                    }
+                });
+        }
+
+        // Update server time every second
+        updateServerTime();
+        setInterval(updateServerTime, 1000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

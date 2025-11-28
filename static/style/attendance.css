@@ -1,0 +1,304 @@
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.fab:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+
+
+.container {
+    margin: 50px auto;
+    max-width: 900px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    table-layout: fixed; 
+}
+
+.attendance-table th, .attendance-table td {
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    width: 33%; 
+}
+
+.attendance-table thead {
+    background-color: #007bff;
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.attendance-table th {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 0.05em;
+    white-space: nowrap; 
+}
+
+.attendance-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.attendance-table tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.badge.present {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge.absent {
+    background-color: #dc3545;
+    color: white;
+}
+
+.taxh-container {
+    margin-bottom: 30px;
+}
+
+.taxh-container h2 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #007bff;
+    font-weight: 600;
+}
+
+.delete-button {
+    background-color: #dc3545; 
+    color: white; 
+    border: none; 
+    padding: 8px 12px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    transition: background-color 0.3s; 
+}
+
+.delete-button:hover {
+    background-color: #c82333; 
+}
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0, 0, 0, 0.7); 
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px; 
+    width: 90%; 
+    max-width: 500px; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s; 
+}
+.taxh-header {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 10px;
+}
+
+.taxh-header h2 {
+    margin: 0;
+}
+
+.delete-button {
+    background-color: #23c828;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px; 
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #23c828;
+    transform: scale(1.05); 
+}
+
+.delete-button:active {
+    background-color: #24a029;
+    transform: scale(1);
+}
+
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.close {
+    
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position:absolute;
+    top:10px;
+    right:10px;
+}
+
+.close:hover {
+    color: #0056b3; 
+}
+
+.special {
+    color: #007bff; 
+    margin-bottom: 20px; 
+    font-size: 1.5em; 
+    font-weight: bold; 
+}
+
+label {
+    display: block; 
+    margin-top: 10px; 
+    font-weight: bold; 
+    color: #333; 
+}
+
+input[type="text"], select {
+    width: 100%; 
+    padding: 10px; 
+    margin-top: 5px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); 
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #007bff; 
+    outline: none; 
+}
+
+.submit-button {
+    background-color: #007BFF;
+    color: white; 
+    border: none; 
+    padding: 10px 15px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    margin-top: 15px; 
+    transition: background-color 0.3s; 
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+.custom-submit {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.custom-submit:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-submit:active {
+    background-color: #003d80;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(0);
+}
+
+.custom-submit:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .attendance-table thead {
+        display: none;
+    }
+
+    .attendance-table tr {
+        display: block;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+        background-color: white;
+        border-radius: 10px;
+    }
+
+    .attendance-table td {
+        display: block;
+        text-align: right;
+        padding-left: 50%;
+        font-size: 0.9em;
+        position: relative;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .attendance-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        font-weight: bold;
+        text-align: left;
+        color: #007bff;
+    }
+
+    .attendance-table td:last-child {
+        border-bottom: 0;
+    }
+}
+

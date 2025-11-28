@@ -1,0 +1,11 @@
+Django
+python-dotenv
+django-background-tasks
+django-bootstrap5
+django-extensions
+whitenoise
+gunicorn
+Pillow
+psycopg2-binary
+dj-database-url
+qrcode[pil]

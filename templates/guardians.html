@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+
+{% block title %}Guardians - Robotiki{% endblock %}
+
+{% block header %}Guardians{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-user-friends me-2"></i>Guardian List</h6>
+        <div>
+             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addGuardianModal">
+                <i class="fas fa-plus me-1"></i> Add Guardian
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="" class="mb-4">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" name="search" 
+                       placeholder="Search by name, phone, email or profession..." 
+                       value="{{ request.GET.search }}"
+                       aria-label="Search guardians">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="dataTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="fw-bold">Name</th>
+                        <th class="fw-bold">Phone</th>
+                        <th class="fw-bold">Email</th>
+                        <th class="fw-bold">Address</th>
+                        <th class="fw-bold">Wards (Students)</th>
+                        <th class="fw-bold text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guardian in guardians %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-user-tie text-primary me-2"></i>
+                            <span class="fw-medium">{{ guardian.first_name }} {{ guardian.last_name }}</span>
+                        </td>
+                        <td>
+                            <i class="fas fa-phone text-muted me-1"></i>
+                            {{ guardian.phone_number }}
+                        </td>
+                        <td>
+                            <i class="fas fa-envelope text-muted me-1"></i>
+                            {{ guardian.email|default:"-" }}
+                        </td>
+                        <td>
+                            <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                            {{ guardian.address|truncatewords:5 }}
+                        </td>
+                        <td>
+                            {% if guardian.students.all %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for student in guardian.students.all %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-user-graduate me-1"></i>
+                                            {{ student.first_name }} {{ student.last_name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">No students</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group" aria-label="Guardian actions">
+                                <button class="btn btn-info btn-sm edit-guardian-btn" 
+                                        data-id="{{ guardian.id }}" 
+                                        title="Edit guardian"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="{% url 'people:delete_guardian' guardian.id %}" method="POST" class="d-inline delete-form" data-confirm-message="Are you sure you want to delete {{ guardian.first_name }} {{ guardian.last_name }}?">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            title="Delete guardian"
+                                            data-bs-toggle="tooltip">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-user-friends fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-0">No guardians found.</p>
+                                <small>Click "Add Guardian" to get started.</small>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Guardian Modal -->
+<div class="modal fade" id="addGuardianModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'people:guardian_list' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Guardian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone_number" class="form-control phone-input" 
+                                   pattern="\d{10}" maxlength="10" 
+                                   placeholder="10 digits only" required
+                                   title="Phone number must be exactly 10 digits">
+                            <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
+                        </div>
+                         <div class="col-md-6">
+                            <label class="form-label">Landline Number</label>
+                            <input type="text" name="landline_number" class="form-control phone-input"
+                                   pattern="\d{10}" maxlength="10" 
+                                   placeholder="10 digits only"
+                                   title="Phone number must be exactly 10 digits">
+                            <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profession</label>
+                            <input type="text" name="profession" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <div class="input-group">
+                                <input type="text" name="address" class="form-control" required>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#mapModal" onclick="openMapModal('add')">
+                                    <i class="fas fa-map-marker-alt"></i> Select on Map
+                                </button>
+                            </div>
+                            <small class="text-muted">You can type the address or select it on the map</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" name="postal_code" class="form-control">
+                        </div>
+                         <div class="col-md-6">
+                            <label class="form-label">Students (Wards)</label>
+                            <select name="students" class="form-select" multiple size="3">
+                                {% for student in students %}
+                                    <option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Guardian</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Guardian Modal -->
+<div class="modal fade" id="editGuardianModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="editGuardianForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Guardian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" id="edit_first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" id="edit_last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone-input"
+                                   pattern="\d{10}" maxlength="10" 
+                                   placeholder="10 digits only" required
+                                   title="Phone number must be exactly 10 digits">
+                            <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
+                        </div>
+                         <div class="col-md-6">
+                            <label class="form-label">Landline Number</label>
+                            <input type="text" name="landline_number" id="edit_landline_number" class="form-control phone-input"
+                                   pattern="\d{10}" maxlength="10" 
+                                   placeholder="10 digits only"
+                                   title="Phone number must be exactly 10 digits">
+                            <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="edit_email" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profession</label>
+                            <input type="text" name="profession" id="edit_profession" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <div class="input-group">
+                                <input type="text" name="address" id="edit_address" class="form-control" required>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#mapModal" onclick="openMapModal('edit')">
+                                    <i class="fas fa-map-marker-alt"></i> Select on Map
+                                </button>
+                            </div>
+                            <small class="text-muted">You can type the address or select it on the map</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" name="postal_code" id="edit_postal_code" class="form-control">
+                        </div>
+                         <div class="col-md-6">
+                            <label class="form-label">Students (Wards)</label>
+                            <select name="students" id="edit_students" class="form-select" multiple size="3">
+                                {% for student in students %}
+                                    <option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Guardian</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Map Modal for Address Selection -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Address on Map</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" id="mapSearchInput" class="form-control" placeholder="Search for a location...">
+                        <button type="button" class="btn btn-primary" onclick="searchLocation()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+                <div id="map" style="height: 500px; width: 100%;"></div>
+                <div class="mt-3">
+                    <p class="mb-1"><strong>Selected Address:</strong></p>
+                    <p id="selectedAddress" class="text-muted">Click on the map to select a location</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAddress()">Confirm Address</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Handle delete form with custom confirmation
+        $('.delete-form').on('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            var message = $(form).data('confirm-message');
+            
+            showCustomConfirm(message, function() {
+                form.submit();
+            });
+        });
+
+        $('.edit-guardian-btn').click(function() {
+            var guardianId = $(this).data('id');
+            var url = "{% url 'people:edit_guardian' 0 %}".replace('0', guardianId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    $('#edit_first_name').val(data.first_name);
+                    $('#edit_last_name').val(data.last_name);
+                    $('#edit_phone_number').val(data.phone_number);
+                    $('#edit_landline_number').val(data.landline_number);
+                    $('#edit_email').val(data.email);
+                    $('#edit_address').val(data.address);
+                    $('#edit_postal_code').val(data.postal_code);
+                    $('#edit_profession').val(data.profession);
+
+                    $('#edit_students option').prop('selected', false);
+                    if(data.student_ids) {
+                        $.each(data.student_ids, function(i, val) {
+                            $('#edit_students option[value="' + val + '"]').prop('selected', true);
+                        });
+                    }
+
+                    var updateUrl = "{% url 'people:update_guardian' 0 %}".replace('0', guardianId);
+                    $('#editGuardianForm').attr('action', updateUrl);
+
+                    var modal = new bootstrap.Modal(document.getElementById('editGuardianModal'));
+                    modal.show();
+                },
+                error: function(xhr, status, error) {
+                    alert("Error fetching guardian data");
+                }
+            });
+        });
+
+        // Phone number validation - allow only digits
+        $('.phone-input').on('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Remove non-digits
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+    });
+
+    // Map variables
+    let map;
+    let marker;
+    let currentMode = 'add'; // 'add' or 'edit'
+    let selectedLat, selectedLng, selectedAddress;
+
+    function openMapModal(mode) {
+        currentMode = mode;
+        
+        // Initialize map if not already initialized
+        if (!map) {
+            setTimeout(() => {
+                map = L.map('map').setView([37.9838, 23.7275], 13); // Default to Athens, Greece
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Add click event to map
+                map.on('click', function(e) {
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    
+                    marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+                    selectedLat = e.latlng.lat;
+                    selectedLng = e.latlng.lng;
+                    
+                    // Reverse geocode to get address
+                    reverseGeocode(e.latlng.lat, e.latlng.lng);
+                });
+            }, 200);
+        } else {
+            // Refresh map size when modal is shown
+            setTimeout(() => map.invalidateSize(), 200);
+        }
+    }
+
+    function searchLocation() {
+        const query = document.getElementById('mapSearchInput').value;
+        if (!query) return;
+
+        // Use Nominatim for geocoding with User-Agent header
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`, {
+            headers: {
+                'User-Agent': 'DjangoManagementSystem/1.0'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    
+                    map.setView([lat, lng], 15);
+                    
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    
+                    marker = L.marker([lat, lng]).addTo(map);
+                    selectedLat = lat;
+                    selectedLng = lng;
+                    selectedAddress = result.display_name;
+                    
+                    document.getElementById('selectedAddress').textContent = selectedAddress;
+                } else {
+                    showCustomConfirm('Location not found. Please try a different search.', function() {});
+                }
+            })
+            .catch(error => {
+                console.error('Error searching location:', error);
+                showCustomConfirm('Error searching location. Please try again.', function() {});
+            });
+    }
+
+    function reverseGeocode(lat, lng) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+            headers: {
+                'User-Agent': 'DjangoManagementSystem/1.0'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    selectedAddress = data.display_name;
+                    document.getElementById('selectedAddress').textContent = selectedAddress;
+                }
+            })
+            .catch(error => {
+                console.error('Error getting address:', error);
+                selectedAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                document.getElementById('selectedAddress').textContent = selectedAddress;
+            });
+    }
+
+    function confirmAddress() {
+        if (!selectedAddress) {
+            showCustomConfirm('Please select a location on the map first.', function() {});
+            return;
+        }
+        
+        // Update the appropriate form fields based on mode
+        if (currentMode === 'add') {
+            document.querySelector('#addGuardianModal input[name="address"]').value = selectedAddress;
+        } else {
+            document.getElementById('edit_address').value = selectedAddress;
+        }
+        
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('mapModal'));
+        modal.hide();
+    }
+</script>
+<!-- Leaflet CSS and JS for Maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+{% endblock %}

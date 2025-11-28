@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Robotiki{% endblock %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Students Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-start border-primary border-4 h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-2">
+                            Total Students</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">{{ student_count }}</div>
+                        <small class="text-muted mt-2"><i class="fas fa-info-circle"></i> Active enrolled students</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-graduate fa-3x" style="color: #4e73df; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grades Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-start border-success border-4 h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-2">
+                            Classes / Grades</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">{{ grade_count }}</div>
+                        <small class="text-muted mt-2"><i class="fas fa-info-circle"></i> Total class groups</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chalkboard fa-3x" style="color: #1cc88a; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Plans Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-start border-info border-4 h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-2">
+                            Active Payment Plans</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">{{ payment_plan_count }}</div>
+                        <small class="text-muted mt-2"><i class="fas fa-info-circle"></i> Available payment options</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-invoice-dollar fa-3x" style="color: #36b9cc; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-gradient-primary text-white">
+                <h6 class="m-0 fw-bold"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'people:student_list' %}" class="btn btn-primary btn-lg text-start">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <span>Manage Students</span>
+                        <i class="fas fa-arrow-right float-end mt-1"></i>
+                    </a>
+                    <a href="{% url 'payments:add_payment' %}" class="btn btn-success btn-lg text-start" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        <span>Record Payment</span>
+                        <i class="fas fa-arrow-right float-end mt-1"></i>
+                    </a>
+                    <a href="{% url 'class_related:attendance_list' %}" class="btn btn-info btn-lg text-start">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        <span>Take Attendance</span>
+                        <i class="fas fa-arrow-right float-end mt-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+         <div class="card shadow-sm h-100">
+            <div class="card-header bg-gradient-info text-white">
+                <h6 class="m-0 fw-bold"><i class="fas fa-home me-2"></i>Welcome</h6>
+            </div>
+            <div class="card-body">
+                <h5 class="text-primary mb-3">Welcome to Robotiki Management System</h5>
+                <p class="text-muted mb-3">Manage your school efficiently with our comprehensive tools:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Track student attendance</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Process payments and receipts</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Manage class schedules</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Monitor student progress</li>
+                </ul>
+                <div class="alert alert-light border-start border-primary border-4 mt-3" role="alert">
+                    <small><i class="fas fa-lightbulb text-warning me-2"></i>Use the sidebar to navigate through different sections.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    }
+    .text-xs {
+        font-size: 0.7rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Student QR Codes - Robotiki{% endblock %}
+
+{% block header %}Student QR Codes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .qr-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        
+        .qr-card {
+            border: 1px solid #dee2e6 !important;
+            box-shadow: none !important;
+        }
+        
+        .card {
+            box-shadow: none !important;
+        }
+    }
+    
+    .qr-code-container {
+        min-height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row no-print">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header py-3 bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold">
+                    <i class="fas fa-qrcode me-2"></i>Student QR Codes for Attendance
+                </h6>
+                <button class="btn btn-light btn-sm" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> Print All
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info border-start border-primary border-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Instructions:</strong> Each student has a unique QR code that can be scanned for attendance. 
+                    You can print these codes and distribute them to students, or display them on screens for scanning.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="qr-codes-container">
+    {% for student in students %}
+    <div class="col-md-4 col-lg-3 mb-4 qr-card">
+        <div class="card shadow-sm h-100">
+            <div class="card-header text-center bg-light">
+                <h6 class="mb-0 fw-bold">{{ student.first_name }} {{ student.last_name }}</h6>
+                {% if student.grade %}
+                <small class="text-muted">{{ student.grade.name }}</small>
+                {% endif %}
+            </div>
+            <div class="card-body text-center">
+                <div class="qr-code-container" id="qr-{{ student.id }}">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">ID: #{{ student.id|stringformat:"05d" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-user-slash fa-3x text-muted mb-3 opacity-25"></i>
+            <p class="text-muted mb-0">No active students found.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Load QR codes for all students
+        {% for student in students %}
+        $.ajax({
+            url: "{% url 'people:student_qr_code' student.id %}",
+            type: 'GET',
+            success: function(data) {
+                $('#qr-{{ student.id }}').html(
+                    '<img src="' + data.qr_code + '" alt="QR Code for {{ student.first_name }} {{ student.last_name }}" class="img-fluid" style="max-width: 200px;">'
+                );
+            },
+            error: function() {
+                $('#qr-{{ student.id }}').html(
+                    '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i><br>Error loading QR code</div>'
+                );
+            }
+        });
+        {% endfor %}
+    });
+</script>
+{% endblock %}

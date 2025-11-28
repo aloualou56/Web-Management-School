@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.first_name }} {{ student.last_name }} - Student Details{% endblock %}
+
+{% block header %}Student Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Student Profile Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    {% if student.photo %}
+                        <img src="{{ student.photo.url }}" alt="{{ student.first_name }} {{ student.last_name }}" 
+                             class="rounded-circle img-thumbnail" 
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-primary d-inline-flex justify-content-center align-items-center text-white fw-bold mx-auto" 
+                             style="width: 150px; height: 150px; font-size: 3rem;">
+                            {{ student.first_name|first }}{{ student.last_name|first }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <h4 class="mb-2">{{ student.first_name }} {{ student.last_name }}</h4>
+                
+                <div class="mb-3">
+                    {% if student.active %}
+                        <span class="badge bg-success px-3 py-2">
+                            <i class="fas fa-check-circle me-1"></i>Active
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary px-3 py-2">
+                            <i class="fas fa-times-circle me-1"></i>Inactive
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary edit-student-btn" data-id="{{ student.id }}">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </button>
+                    <button class="btn btn-info" id="viewQrCodeBtn">
+                        <i class="fas fa-qrcode me-2"></i>View QR Code
+                    </button>
+                    <a href="{% url 'people:student_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-chart-bar me-2"></i>Attendance Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-0 text-success">{{ student.presences }}</h5>
+                        <small class="text-muted">Presences</small>
+                    </div>
+                    <div class="text-end">
+                        <h5 class="mb-0 text-danger">{{ student.absences }}</h5>
+                        <small class="text-muted">Absences</small>
+                    </div>
+                </div>
+                {% if student.presences > 0 or student.absences > 0 %}
+                    {% widthratio student.presences 1 100 as presence_percentage %}
+                    {% widthratio presence_percentage student.presences|add:student.absences 1 as attendance_rate %}
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ attendance_rate }}%" 
+                             aria-valuenow="{{ attendance_rate }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ attendance_rate }}% attendance rate</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Information -->
+    <div class="col-lg-8">
+        <!-- Personal Information Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-user me-2"></i>Personal Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-id-card me-2"></i>Student ID
+                            </label>
+                            <div class="fw-medium">#{{ student.id|stringformat:"05d" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-birthday-cake me-2"></i>Birth Date
+                            </label>
+                            <div class="fw-medium">{{ student.birth_date|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-phone me-2"></i>Phone Number
+                            </label>
+                            <div class="fw-medium">{{ student.phone_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </label>
+                            <div class="fw-medium">{{ student.email|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-home me-2"></i>Address
+                            </label>
+                            <div class="fw-medium">{{ student.address|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Information Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-graduation-cap me-2"></i>Academic Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-chalkboard me-2"></i>Grade/Class
+                            </label>
+                            <div class="fw-medium">
+                                {% if student.grade %}
+                                    <span class="badge bg-info">{{ student.grade.name }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-school me-2"></i>School
+                            </label>
+                            <div class="fw-medium">{{ student.school|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <label class="text-muted small mb-1">
+                                <i class="fas fa-calendar me-2"></i>School Year
+                            </label>
+                            <div class="fw-medium">{{ student.school_year|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrolled Courses/Payment Plan Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-book-reader me-2"></i>Enrolled Plan
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if student.payment_plan %}
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ student.payment_plan.name }}</h6>
+                            <p class="text-muted small mb-0">{{ student.payment_plan.description|default:"" }}</p>
+                        </div>
+                        <div class="text-end">
+                            {% if student.payment_plan.monthly_fee > 0 %}
+                                <div class="fw-bold text-primary">${{ student.payment_plan.monthly_fee }}/month</div>
+                            {% endif %}
+                            {% if student.payment_plan.one_time_fee > 0 %}
+                                <small class="text-muted">One-time: ${{ student.payment_plan.one_time_fee }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No payment plan assigned</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Guardians Card -->
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-user-friends me-2"></i>Guardians
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if student.guardians.all %}
+                    <div class="row g-3">
+                        {% for guardian in student.guardians.all %}
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">{{ guardian.first_name }} {{ guardian.last_name }}</h6>
+                                <div class="small text-muted">
+                                    <div><i class="fas fa-phone me-2"></i>{{ guardian.phone_number }}</div>
+                                    {% if guardian.email %}
+                                    <div><i class="fas fa-envelope me-2"></i>{{ guardian.email }}</div>
+                                    {% endif %}
+                                    {% if guardian.profession %}
+                                    <div><i class="fas fa-briefcase me-2"></i>{{ guardian.profession }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No guardians assigned</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>QR Code for {{ student.first_name }} {{ student.last_name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeContainer">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-muted mb-1">Student ID: #{{ student.id|stringformat:"05d" }}</p>
+                    <small class="text-muted">Scan this code to mark attendance</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadQrBtn">
+                    <i class="fas fa-download me-1"></i>Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="editStudentForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                         <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" id="edit_first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" id="edit_last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone_number" id="edit_phone_number" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="edit_email" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" id="edit_address" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Birth Date</label>
+                            <input type="date" name="birth_date" id="edit_birth_date" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Grade</label>
+                            <select name="grade" id="edit_grade" class="form-select">
+                                <option value="">Select Grade</option>
+                                {% for grade in grades %}
+                                    <option value="{{ grade.id }}">{{ grade.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                         <div class="col-md-6">
+                            <label class="form-label">School</label>
+                            <input type="text" name="school" id="edit_school" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">School Year</label>
+                            <input type="text" name="school_year" id="edit_school_year" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Payment Plan</label>
+                            <select name="payment_plan" id="edit_payment_plan" class="form-select">
+                                <option value="">Select Plan</option>
+                                {% for plan in payment_plans %}
+                                    <option value="{{ plan.id }}">{{ plan.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Guardians</label>
+                            <select name="guardians" id="edit_guardians" class="form-select" multiple size="3">
+                                {% for guardian in guardians %}
+                                    <option value="{{ guardian.id }}">{{ guardian.first_name }} {{ guardian.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        let currentQrData = null;
+        
+        // View QR Code button
+        $('#viewQrCodeBtn').click(function() {
+            $.ajax({
+                url: "{% url 'people:student_qr_code' student.id %}",
+                type: 'GET',
+                success: function(data) {
+                    currentQrData = data;
+                    $('#qrCodeContainer').html(
+                        '<img src="' + data.qr_code + '" alt="QR Code" class="img-fluid" style="max-width: 300px;">'
+                    );
+                    var modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+                    modal.show();
+                },
+                error: function() {
+                    alert('Error loading QR code');
+                }
+            });
+        });
+        
+        // Download QR Code button
+        $('#downloadQrBtn').click(function() {
+            if (currentQrData) {
+                const link = document.createElement('a');
+                link.href = currentQrData.qr_code;
+                link.download = 'qr_code_{{ student.first_name }}_{{ student.last_name }}.png';
+                link.click();
+            }
+        });
+        
+        $('.edit-student-btn').click(function() {
+            var studentId = $(this).data('id');
+            var url = "{% url 'people:edit_student' 0 %}".replace('0', studentId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    $('#edit_first_name').val(data.first_name);
+                    $('#edit_last_name').val(data.last_name);
+                    $('#edit_phone_number').val(data.phone_number);
+                    $('#edit_email').val(data.email);
+                    $('#edit_address').val(data.address);
+                    $('#edit_school').val(data.school);
+                    $('#edit_school_year').val(data.school_year);
+                    $('#edit_birth_date').val(data.birth_date);
+
+                    if(data.grade) {
+                        $('#edit_grade').val(data.grade.id);
+                    } else {
+                        $('#edit_grade').val('');
+                    }
+
+                    if(data.payment_plan) {
+                        $('#edit_payment_plan').val(data.payment_plan.id);
+                    } else {
+                        $('#edit_payment_plan').val('');
+                    }
+
+                    // Handle multiple select for guardians
+                    $('#edit_guardians option').prop('selected', false);
+                    if(data.guardian_ids) {
+                        $.each(data.guardian_ids, function(i, val) {
+                            $('#edit_guardians option[value="' + val + '"]').prop('selected', true);
+                        });
+                    }
+
+                    var updateUrl = "{% url 'people:update_student' 0 %}".replace('0', studentId);
+                    $('#editStudentForm').attr('action', updateUrl);
+
+                    var modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+                    modal.show();
+                },
+                error: function(xhr, status, error) {
+                    alert("Error fetching student data");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

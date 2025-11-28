@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Payments - Robotiki{% endblock %}
+
+{% block header %}Student Payments{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-money-bill-wave me-2"></i>Payment Records</h6>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+            <i class="fas fa-plus me-1"></i> New Payment Record
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="fw-bold">Student</th>
+                        <th class="fw-bold">Payment Plan</th>
+                        <th class="fw-bold">Academic Year</th>
+                        <th class="fw-bold">Total Paid</th>
+                        <th class="fw-bold" style="min-width: 200px;">Progress</th>
+                        <th class="fw-bold text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-user-graduate text-primary me-2"></i>
+                            <span class="fw-medium">{{ payment.student.first_name }} {{ payment.student.last_name }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ payment.payment_plan.name }}</span>
+                        </td>
+                        <td>
+                            <i class="fas fa-calendar text-muted me-1"></i>
+                            {{ payment.academic_year }}
+                        </td>
+                        <td>
+                            <span class="text-success fw-bold">
+                                <i class="fas fa-dollar-sign me-1"></i>${{ payment.total_amount_paid }}
+                            </span>
+                        </td>
+                        <td>
+                            {% with total=payment.payment_plan.months.count paid=payment.months_paid.count %}
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         style="width: {% if total > 0 %}{% widthratio paid total 100 %}{% else %}0{% endif %}%;"
+                                         aria-valuenow="{{ paid }}" aria-valuemin="0" aria-valuemax="{{ total }}">
+                                        <span class="fw-bold">{{ paid }}/{{ total }} Months</span>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% widthratio paid total 100 %}% Complete
+                                </small>
+                            {% endwith %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group" aria-label="Payment actions">
+                                <button class="btn btn-success btn-sm add-receipt-btn"
+                                        data-id="{{ payment.id }}"
+                                        data-student="{{ payment.student.first_name }} {{ payment.student.last_name }}"
+                                        title="Add Receipt"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-receipt me-1"></i> Pay
+                                </button>
+                                <form action="{% url 'payments:delete_payment' payment.id %}" method="POST" class="d-inline delete-form" data-confirm-message="Delete this payment record for {{ payment.student.first_name }}?">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            title="Delete Payment"
+                                            data-bs-toggle="tooltip">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-money-bill-wave fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-0">No payment records found.</p>
+                                <small>Click "New Payment Record" to get started.</small>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Payment Record Modal (Assign Plan to Student) -->
+<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addPaymentForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Payment Plan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Note: This form needs AJAX because the view returns JSON -->
+                    <div class="mb-3">
+                        <label class="form-label">Student ID (UUID or ID)</label>
+                         <!-- Ideally a dropdown, but 'add_payment' view takes ID.
+                              Since I don't have student list in context here easily (payment_list view doesn't pass it),
+                              I should probably update the view or use a simple text input if I knew the ID.
+                              Wait, the view 'payment_list' only passes 'payments'.
+                              I should probably Fetch students via AJAX or just use the Student Add/Edit flow to create payments automatically (which the model does!).
+                              The model `Student.save()` creates a payment if a plan is assigned.
+                              So maybe this manual creation is for special cases?
+                              Let's use a text input for Student ID for now, or suggest using Student Edit.
+                         -->
+                         <p class="text-warning small">
+                             Tip: Assigning a Payment Plan to a Student in the "Students" page automatically creates a payment record.
+                             Use this only for manual overrides.
+                         </p>
+                         <input type="text" name="student" class="form-control" placeholder="Student ID" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Plan ID</label>
+                        <input type="text" name="payment_plan" class="form-control" placeholder="Payment Plan ID" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <input type="text" name="academic_year" class="form-control" placeholder="e.g., 2023-2024">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Receipt Modal -->
+<div class="modal fade" id="addReceiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'payments:add_receipt' %}">
+                {% csrf_token %}
+                <input type="hidden" name="payment_id" id="receipt_payment_id">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Receipt for <span id="receipt_student_name"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Receipt Number</label>
+                        <input type="text" name="receipt_number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount Paid</label>
+                        <input type="number" step="0.01" name="amount_paid" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="description" class="form-control" placeholder="e.g. September Fee">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Process Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Handle delete form with custom confirmation
+        $('.delete-form').on('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            var message = $(form).data('confirm-message');
+            
+            showCustomConfirm(message, function() {
+                form.submit();
+            });
+        });
+
+        $('.add-receipt-btn').click(function() {
+            var paymentId = $(this).data('id');
+            var studentName = $(this).data('student');
+
+            $('#receipt_payment_id').val(paymentId);
+            $('#receipt_student_name').text(studentName);
+
+            var modal = new bootstrap.Modal(document.getElementById('addReceiptModal'));
+            modal.show();
+        });
+
+        $('#addPaymentForm').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{% url 'payments:add_payment' %}",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                   location.reload();
+                },
+                error: function(xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Scanner - Robotiki{% endblock %}
+
+{% block header %}QR Code Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    #reader {
+        border: 2px solid #e3e6f0;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    #reader__dashboard_section {
+        padding: 1rem !important;
+    }
+    
+    #reader__scan_region {
+        border-radius: 0.35rem;
+    }
+    
+    .scan-success {
+        animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Scanner Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3 bg-gradient-primary text-white">
+                <h6 class="m-0 fw-bold">
+                    <i class="fas fa-qrcode me-2"></i>Scan Student QR Code
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info border-start border-primary border-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Instructions:</strong> Position the QR code within the scanning area. The system will automatically mark attendance when a valid code is detected.
+                </div>
+                
+                <div id="reader" class="mb-3"></div>
+                
+                <div id="scan-status" class="d-none">
+                    <div class="alert alert-dismissible fade show" role="alert" id="status-message">
+                        <span id="status-text"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Scans Card -->
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-history me-2"></i>Recent Scans
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="recent-scans" class="list-group">
+                    <p class="text-muted text-center mb-0">No scans yet. Start scanning to see results here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+    const csrfToken = '{{ csrf_token }}';
+    let recentScans = [];
+
+    function showStatus(message, isSuccess) {
+        const statusDiv = document.getElementById('scan-status');
+        const statusMessage = document.getElementById('status-message');
+        const statusText = document.getElementById('status-text');
+        
+        statusDiv.classList.remove('d-none');
+        statusMessage.className = `alert alert-${isSuccess ? 'success' : 'danger'} alert-dismissible fade show`;
+        statusText.innerHTML = `<i class="fas fa-${isSuccess ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
+        
+        if (isSuccess) {
+            statusMessage.classList.add('scan-success');
+        }
+    }
+
+    function addToRecentScans(text, success, message) {
+        const recentScansDiv = document.getElementById('recent-scans');
+        const timestamp = new Date().toLocaleTimeString();
+        
+        // Remove the "no scans" message if it exists
+        if (recentScans.length === 0) {
+            recentScansDiv.innerHTML = '';
+        }
+        
+        const scanItem = document.createElement('div');
+        scanItem.className = `list-group-item list-group-item-action ${success ? 'list-group-item-success' : 'list-group-item-danger'}`;
+        scanItem.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">
+                    <i class="fas fa-${success ? 'check' : 'times'} me-2"></i>${message}
+                </h6>
+                <small>${timestamp}</small>
+            </div>
+            <p class="mb-1"><small class="text-muted">Code: ${text}</small></p>
+        `;
+        
+        // Add to top of the list
+        recentScansDiv.insertBefore(scanItem, recentScansDiv.firstChild);
+        
+        // Keep only last 5 scans
+        recentScans.unshift({text, success, message, timestamp});
+        if (recentScans.length > 5) {
+            recentScans.pop();
+            recentScansDiv.removeChild(recentScansDiv.lastChild);
+        }
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Code scanned = ${decodedText}`, decodedResult);
+        
+        // Send the decoded text to the server
+        fetch("{% url 'people:check_attendance' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `text_input=${decodedText}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            showStatus(data.message, data.match || false);
+            addToRecentScans(decodedText, data.match || false, data.message);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showStatus('Network error: Unable to process attendance', false);
+            addToRecentScans(decodedText, false, 'Network error');
+        });
+    }
+
+    function onScanFailure(error) {
+        // Handle scan failure silently (errors are common during scanning)
+        // console.warn(`QR code scan error = ${error}`);
+    }
+
+    // Initialize the QR scanner
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        },
+        /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}
