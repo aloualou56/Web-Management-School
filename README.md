@@ -6,7 +6,7 @@ A comprehensive Django-based school/class management system for managing student
 
 Try out the application with a live demo:
 
-**Demo URL:** [https://django-management.onrender.com](https://django-management.onrender.com)
+**Demo URL:** [https://web-management-school.onrender.com](https://web-management-school.onrender.com)
 
 **Demo Credentials:**
 - **Username:** `demo`
