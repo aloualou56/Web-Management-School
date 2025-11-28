@@ -9,34 +9,34 @@ password using Django's `changepassword` command or the admin UI.
 """
 
 from django.db import migrations
-
+from django.contrib.auth.hashers import make_password
 
 def set_admin_password(apps, schema_editor):
-    """Ensure an `admin` superuser exists with no usable password.
-
-    This avoids storing plaintext passwords in migrations. After deployment,
-    run `python manage.py changepassword admin` to set a proper password.
+    """Ensure an `admin` superuser exists with password 'admin123'.
+    
+    WARNING: Hardcoding passwords in migrations is a security risk.
+    Ensure this is only used for development or testing environments.
     """
     User = apps.get_model('auth', 'User')
+    password_hash = make_password('admin123')
 
     try:
         admin_user = User.objects.get(username='admin')
-        admin_user.set_unusable_password()
+        admin_user.password = make_password('admin123')
         admin_user.is_staff = True
         admin_user.is_superuser = True
+        admin_user.is_active = True
         admin_user.save()
     except User.DoesNotExist:
-        # Create admin user with an unusable password; owner must set password later.
-        admin_user = User.objects.create(
-            username='admin',
-            email='admin@example.com',
-            is_staff=True,
-            is_active=True,
-            is_superuser=True,
+        # Create admin user with the specified password
+        User.objects.create(
+            username = 'admin',
+            email = 'admin@example.com',
+            password = make_password('admin123'),
+            is_staff = True,
+            is_active = True,
+            is_superuser = True,
         )
-        admin_user.set_unusable_password()
-        admin_user.save()
-
 
 def reverse_password_change(apps, schema_editor):
     # No reversible action: do nothing
