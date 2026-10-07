@@ -63,9 +63,9 @@ def student_list(request):
     search_query = request.GET.get('search', '')
     if search_query:
         students = Student.objects.filter(
-            models.Q(first_name__icontains=search_query) |
-            models.Q(last_name__icontains=search_query) |
-            models.Q(phone_number__icontains=search_query)
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(phone_number__icontains=search_query)
         )
     else:
         students = Student.objects.all()
